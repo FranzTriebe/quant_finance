@@ -1,3 +1,5 @@
+import math
+from scipy.stats import norm
 
 #Volatility Input
 while True:
@@ -18,22 +20,32 @@ while True:
 
 #Strike Price Input
 while True:
-    current_price = float(input("Strike Price: "))
-    if(current_price < 0):
+    strike_price = float(input("Strike Price: "))
+    if(strike_price < 0):
         print("Strike Price cannot be a negative value, please enter a correct value.")
-        current_price = float(input("Strike Price: "))
+        strike_price = float(input("Strike Price: "))
     else:
         break
 
 #Interest rate Input
-current_price = float(input("Interest rate (percent): "))
+interest_rate = float(input("Interest rate (percent): "))
 
 #Maturity Input
 while True:
-    current_price = float(input("Maturity (years): "))
-    if(current_price < 0):
+    maturity = float(input("Maturity (years): "))
+    if(maturity < 0):
         print("Maturity cannot be a negative value, please enter a correct value.")
-        current_price = float(input("Maturity (years): "))
+        maturity = float(input("Maturity (years): "))
     else:
         break
 
+#Calculation
+
+#d1
+d1 = (math.log(current_price / strike_price) + (math.log1p(interest_rate) + math.pow(volatility, 2)/2 * maturity))/(volatility * math.sqrt(maturity))
+
+#d2
+d2 = d1 - volatility * math.sqrt(maturity)
+
+#black-scholes-formula
+price = current_price * math.n
