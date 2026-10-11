@@ -1,85 +1,54 @@
-"""House style for figures: ``apply_style()``, the ``PALETTE`` colours and a helper for
-labelled reference lines.
+"""House style for figures: the academic black and white style of ``quantlab.acad``.
 
-Rules: one y axis per chart, 2px lines, a light solid grid, text in the text colours
-(never in series colours), a legend from two series on, reference lines labelled
-directly, and a title that states the takeaway.
+``apply_style()`` and ``PALETTE`` keep the interface PLAN.md defines, but now follow the
+academic-graphs skill: boxed axes, serif text, black and grey only, series told apart by
+line style. New figure code should use ``quantlab.acad`` directly (panel titles, notes,
+the standard wealth and drawdown figure, PDF and PNG output).
 """
 
 from __future__ import annotations
 
 import matplotlib as mpl
-from cycler import cycler
 from matplotlib.axes import Axes
 
+from quantlab import acad
+
 PALETTE = {
-    "primary": "#2a78d6",
-    "comparison": "#eb6834",
-    "third": "#1baf7a",
-    "text": "#0b0b0b",
-    "text_secondary": "#52514e",
-    "grid": "#e4e3df",
-    "surface": "#fcfcfb",
+    "primary": acad.INK,
+    "comparison": acad.INK,
+    "third": acad.GREY,
+    "text": acad.INK,
+    "text_secondary": acad.GREY,
+    "grid": acad.GRID,
+    "surface": "white",
 }
 
 
 def apply_style() -> None:
-    """Set matplotlib defaults once per notebook; every later chart follows them."""
-    p = PALETTE
-    mpl.rcParams.update({
-        "figure.figsize": (10, 4.5),
-        "figure.dpi": 110,
-        "figure.facecolor": p["surface"],
-        "axes.facecolor": p["surface"],
-        "axes.edgecolor": p["grid"],
-        "axes.labelcolor": p["text_secondary"],
-        "axes.titlecolor": p["text"],
-        "axes.titlesize": 12,
-        "axes.titleweight": "bold",
-        "axes.titlelocation": "left",
-        "axes.spines.top": False,
-        "axes.spines.right": False,
-        "axes.grid": True,
-        "axes.axisbelow": True,
-        "axes.prop_cycle": cycler(color=[p["primary"], p["comparison"], p["third"]]),
-        "grid.color": p["grid"],
-        "grid.linestyle": "-",
-        "grid.linewidth": 0.6,
-        "lines.linewidth": 2.0,
-        "xtick.color": p["text_secondary"],
-        "ytick.color": p["text_secondary"],
-        "text.color": p["text"],
-        "legend.frameon": False,
-        "legend.labelcolor": p["text"],
-        "savefig.dpi": 150,
-        "savefig.bbox": "tight",
-        "savefig.facecolor": p["surface"],
-    })
+    """Reset matplotlib and apply the academic style; call once at the top of a notebook."""
+    acad.apply_style()
 
 
 def reference_line(ax: Axes, value: float, label: str, axis: str = "x",
-                   color: str | None = None, side: str = "right",
-                   ypos: float = 1.0) -> None:
-    """Draw a dashed reference line (a benchmark, a hurdle) and label it on the line.
+                   linestyle: str = "--", side: str = "right", ypos: float = 1.0) -> None:
+    """Black reference line (a benchmark, a hurdle) labelled directly on the chart.
 
-    ``axis="x"`` draws a vertical line at x = value, ``axis="y"`` a horizontal one.
-    The label sits next to the line in the secondary text colour, so no legend entry
-    is needed. ``side="left"`` puts it on the other side of a vertical line, so two
-    nearby lines can both be labelled, and ``ypos`` (0 to 1, axes height) moves the label
-    of a vertical line down so that three close lines stay readable.
+    ``axis="x"`` draws a vertical line at x = value, ``axis="y"`` a horizontal one. Use
+    different ``linestyle`` values (``"--"``, ``":"``, ``"-."``) to tell several lines
+    apart. ``side="left"`` puts the label on the other side of a vertical line and
+    ``ypos`` (0 to 1, axes height) moves it down, so close lines stay readable.
     """
-    color = color or PALETTE["text_secondary"]
-    style = {"color": color, "linestyle": "--", "linewidth": 1.2}
-    text = {"color": PALETTE["text_secondary"], "fontsize": 9}
+    fs = mpl.rcParams["legend.fontsize"]
     if axis == "x":
-        ax.axvline(value, **style)
+        ax.axvline(value, color=acad.INK, linestyle=linestyle, linewidth=0.9)
         left = side == "left"
-        ax.annotate(label, (value, ypos), xycoords=("data", "axes fraction"),
-                    xytext=(-4 if left else 4, -4), textcoords="offset points", va="top",
-                    ha="right" if left else "left", **text)
+        ax.annotate(label, xy=(value, ypos), xycoords=("data", "axes fraction"),
+                    xytext=(-3 if left else 3, -3), textcoords="offset points",
+                    ha="right" if left else "left", va="top", fontsize=fs)
     elif axis == "y":
-        ax.axhline(value, **style)
-        ax.annotate(label, (0, value), xycoords=("axes fraction", "data"),
-                    xytext=(4, 4), textcoords="offset points", va="bottom", **text)
+        ax.axhline(value, color=acad.INK, linestyle=linestyle, linewidth=0.9)
+        ax.annotate(label, xy=(1.0, value), xycoords=("axes fraction", "data"),
+                    xytext=(-3, 3), textcoords="offset points", ha="right", va="bottom",
+                    fontsize=fs)
     else:
         raise ValueError("axis must be 'x' or 'y'")
