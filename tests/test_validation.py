@@ -113,3 +113,14 @@ def test_referee_report_and_markdown():
     noise = data.simulate_returns(2520, n_assets=20, seed=8)
     best = (noise.mean() / noise.std()).idxmax()
     assert v.referee_report(noise, best)["verdict"] == "Not distinguishable from luck"
+
+
+def test_ledger_count_survives_a_data_refresh(tmp_path):
+    path = str(tmp_path / "ledger.csv")
+    stats_a = pd.DataFrame({"sharpe": [0.5, 0.7]}, index=["a", "b"])
+    stats_b = pd.DataFrame({"sharpe": [0.1]}, index=["c"])
+    v.ledger_append("p01", "SPY 1993-02-01 2026-10-09", stats_a, path)
+    v.ledger_append("p01", "SPY 1993-02-01 2026-11-30", stats_b, path)  # refreshed data
+    v.ledger_append("p01", "SPY 2000-01-03 2026-11-30", stats_b, path)  # different start
+    assert v.ledger_count("p01", "SPY 1993-02-01 2026-12-31", path) == 3
+    assert v.ledger_count("p01", "SPY 2000-01-03 2026-11-30", path) == 1

@@ -293,13 +293,26 @@ def ledger_append(project: str, data_id: str, trial_stats: pd.DataFrame,
 
 
 def ledger_count(project: str, data_id: str, path: str = "output/trial_ledger.csv") -> int:
-    """Number of distinct trial ids ever run by this project on this data (0 if none)."""
+    """Number of distinct trial ids ever run by this project on this data (0 if none).
+
+    A data id that ends in a date (``"SPY 1993-02-01 2026-10-09"``) is matched without
+    that end date: when the data is refreshed and runs further, every trial tried on the
+    shorter history still counts.
+    """
     file = _ledger_path(path)
     if not file.exists():
         return 0
     ledger = pd.read_csv(file)
-    mask = (ledger["project"] == project) & (ledger["data_id"] == data_id)
+    same_data = ledger["data_id"].map(_series_key) == _series_key(data_id)
+    mask = (ledger["project"] == project) & same_data
     return int(ledger.loc[mask, "trial_id"].nunique())
+
+
+def _series_key(data_id: str) -> str:
+    """The data id without a trailing end date (YYYY-MM-DD), if it has one."""
+    head, _, last = str(data_id).rpartition(" ")
+    is_date = len(last) == 10 and last[4] == last[7] == "-" and last.replace("-", "").isdigit()
+    return head if head and is_date else str(data_id)
 
 
 # Holdout check -------------------------------------------------------------------------

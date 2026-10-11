@@ -17,7 +17,8 @@ def make_data_id(label: str, returns: pd.Series) -> str:
     """Ledger key for a data set: label plus first and last date of the loaded returns.
 
     It uses the loaded data, not a strategy's sample after warmup, so trials with
-    different warmups on the same data share one count.
+    different warmups on the same data share one count. ``validation.ledger_count``
+    ignores the end date, so refreshing the data does not reset the count either.
     """
     return f"{label} {returns.index[0]:%Y-%m-%d} {returns.index[-1]:%Y-%m-%d}"
 
