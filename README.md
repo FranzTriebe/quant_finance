@@ -1,48 +1,64 @@
-# Quant Finance
+# quant_finance
 
-A collection of quantitative finance projects as Jupyter notebooks. Each project lives in its own folder, and every notebook is self-contained: no shared helper modules, so each one runs top to bottom on its own.
+Quant research projects based on academic papers, built on a tested backtesting and validation engine.
 
-## Projects
+The core is `quantlab`, a small Python package that runs backtests without look ahead bias and then acts as a referee: it asks how much of a backtest result survives once you account for how many variants were tried. Every project in this repo runs its results through that referee before calling anything a finding. The full build plan for the first project is in [PLAN.md](PLAN.md).
 
-| Project | Description |
-| --- | --- |
-| [momentum_strategy](momentum_strategy/) | Moving-average crossover (9/21-day) strategy on gold (GLD), compared against buy & hold |
-| [black_scholes](black_scholes/) | European option pricing with the Black-Scholes model *(work in progress)* |
+## Installation
 
-## Setup
+Requires Python 3.11 or newer (developed on 3.12).
 
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate
+git clone https://github.com/FranzTriebe/quant_finance.git
+cd quant_finance
+python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-## Running a notebook
+This also installs `quantlab` in editable mode, so `import quantlab` works from any notebook or script.
+
+## Usage
+
+Run the tests:
+
+```bash
+pytest -q
+```
+
+Open a notebook in VS Code (select the `.venv` interpreter) or in Jupyter Lab:
 
 ```bash
 jupyter lab
 ```
 
-Then open a project's `.ipynb` file and run all cells. You can also open the notebooks directly in PyCharm or VS Code using the `.venv` interpreter.
+## Projects
 
-## Adding a new project
+| Project | Status | Question |
+| --- | --- | --- |
+| [P1: Backtest referee](PLAN.md) | in progress (Phase 0 of 6 done) | I tried N variants of a strategy and kept the best one. How much of its backtest should I believe? |
+| P2: Regime switching with statistical jump models | planned | Does cutting exposure in detected bear regimes help on the S&P 500, DAX and SMI? |
+| P3: Trend following and CTA replication | planned | How well do trend factors at different speeds explain a managed futures fund? |
+| P4: Swiss franc hedging | planned | How much currency risk should a CHF investor hedge? |
+| P5: Technology momentum from patent data | planned | Do technologically linked firms predict each other's returns? |
 
-1. Create a folder with a `snake_case` name, e.g. `pairs_trading/`.
-2. Add a notebook inside it, named after the folder (`pairs_trading/pairs_trading.ipynb`). Keep all code in the notebook itself; don't import from other projects.
-3. Add a short `README.md` in the folder covering what it does.
-4. Add any new dependencies to the root `requirements.txt`.
-5. Add a row to the **Projects** table above.
+Earlier exercises, kept as standalone notebooks:
 
-## Repository structure
+* [momentum_strategy](projects/momentum_strategy/): 9/21 day moving average crossover on gold (GLD) against buy and hold.
+* [black_scholes](projects/black_scholes/): European option pricing with Black Scholes (unfinished).
 
+## Project structure
+
+```text
+├── quantlab/          # the engine: data, risk, backtest, stats, validation, plotting
+├── projects/          # one folder per project
+├── tests/             # pytest suite, runs offline on simulated data
+├── data/              # cached downloads (not committed)
+├── output/            # figures, reports, trial ledger (not committed)
+├── .claude/skills/    # house rules for commits, notebooks and READMEs
+├── CLAUDE.md          # working rules for Claude Code in this repo
+└── PLAN.md            # build plan for Project 1
 ```
-quant_finance/
-├── README.md
-├── requirements.txt              # shared dependencies for all projects
-├── momentum_strategy/
-│   ├── README.md
-│   └── momentum_strategy.ipynb
-└── black_scholes/
-    ├── README.md
-    └── black_scholes_model.ipynb
-```
+
+## Contributing
+
+This is a personal research repo. Commits follow Conventional Commits.
