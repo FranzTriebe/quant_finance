@@ -35,7 +35,7 @@ jupyter lab
 
 | Project | Status | Question |
 | --- | --- | --- |
-| [P1: Backtest referee](PLAN.md) | in progress (Phase 3 of 6 done) | I tried N variants of a strategy and kept the best one. How much of its backtest should I believe? |
+| [P1: Backtest referee](PLAN.md) | in progress (Phase 4 of 6 done) | I tried N variants of a strategy and kept the best one. How much of its backtest should I believe? |
 | P2: Regime switching with statistical jump models | planned | Does cutting exposure in detected bear regimes help on the S&P 500, DAX and SMI? |
 | P3: Trend following and CTA replication | planned | How well do trend factors at different speeds explain a managed futures fund? |
 | P4: Swiss franc hedging | planned | How much currency risk should a CHF investor hedge? |
