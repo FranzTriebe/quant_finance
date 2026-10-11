@@ -58,20 +58,23 @@ def apply_style() -> None:
 
 
 def reference_line(ax: Axes, value: float, label: str, axis: str = "x",
-                   color: str | None = None) -> None:
+                   color: str | None = None, side: str = "right") -> None:
     """Draw a dashed reference line (a benchmark, a hurdle) and label it on the line.
 
     ``axis="x"`` draws a vertical line at x = value, ``axis="y"`` a horizontal one.
     The label sits next to the line in the secondary text colour, so no legend entry
-    is needed.
+    is needed. ``side="left"`` puts it on the other side of a vertical line, so two
+    nearby lines can both be labelled.
     """
     color = color or PALETTE["text_secondary"]
     style = {"color": color, "linestyle": "--", "linewidth": 1.2}
     text = {"color": PALETTE["text_secondary"], "fontsize": 9}
     if axis == "x":
         ax.axvline(value, **style)
+        left = side == "left"
         ax.annotate(label, (value, 1), xycoords=("data", "axes fraction"),
-                    xytext=(4, -4), textcoords="offset points", va="top", **text)
+                    xytext=(-4 if left else 4, -4), textcoords="offset points", va="top",
+                    ha="right" if left else "left", **text)
     elif axis == "y":
         ax.axhline(value, **style)
         ax.annotate(label, (0, value), xycoords=("axes fraction", "data"),

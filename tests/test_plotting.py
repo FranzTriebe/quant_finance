@@ -26,3 +26,10 @@ def test_reference_line_draws_line_and_label(axis):
     assert len(ax.lines) == 1
     assert any(t.get_text() == "hurdle" for t in ax.texts)
     plt.close(fig)
+
+
+def test_reference_line_label_can_sit_left_of_the_line():
+    fig, ax = plt.subplots()
+    plotting.reference_line(ax, 0.5, "left label", side="left")
+    assert ax.texts[0].get_ha() == "right"
+    plt.close(fig)
