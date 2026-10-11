@@ -16,6 +16,7 @@ Learning matters as much as the code: Franz has to understand every result he ge
 3. Before saying a phase is done, `pytest -q` must pass and the phase's acceptance checks must hold. Never report done with failing tests.
 4. Ask before changing an interface in `quantlab/` that `PLAN.md` defines, and before adding a dependency.
 5. Commit at the end of each phase following the `git-commits` skill (Conventional Commits). Use scope `p01` for project work and name the phase in the body, for example `feat(p01): add referee validation module` with body `Phase 2 of PLAN.md.` No attribution trailers.
+6. Push after every clear unit of work, so each push on GitHub has one explicit purpose (for example: one module with its tests).
 
 ## Skills
 
@@ -44,8 +45,8 @@ Where a skill and this file disagree, the hard rules below and `PLAN.md` win. In
 
 * Python 3.11 or newer, with type hints.
 * Short numpy style docstrings that explain the finance, not only the code.
-* `quantlab/` holds pure functions. File I/O happens only in `data.py` and in the project scripts.
-* Project scripts use `# %%` cells, so they run both as scripts and in the VS Code interactive window.
+* `quantlab/` holds pure functions. File I/O happens only in `data.py` and in the project notebooks.
+* Project work lives in Jupyter notebooks that follow the `notebook-craft` skill. They import `quantlab` like any installed library and need no other local files. Code that tests must import belongs in `quantlab/`.
 * Figures:
   * matplotlib, one y axis per chart, 2px lines, light solid grid
   * colors from `quantlab.plotting.PALETTE`
@@ -62,4 +63,4 @@ Where a skill and this file disagree, the hard rules below and `PLAN.md` win. In
 
 * Setup: `python3 -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt`
 * Tests: `pytest -q`
-* Project 1: `python projects/p01_referee/run.py --ticker SPY`
+* Project 1: open the notebooks in `projects/p01_referee/` in order and run all cells

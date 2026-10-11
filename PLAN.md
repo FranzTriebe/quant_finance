@@ -4,6 +4,11 @@ Build plan for Claude Code. Read `CLAUDE.md` first; it holds the standing rules 
 
 Work **one phase at a time** (section 10). After each phase, stop at its checkpoint and wait for Franz.
 
+> **Changes agreed after this plan was written (2026-10-11)**
+> 1. **Notebooks instead of scripts.** Everything in `projects/p01_referee/` is a Jupyter notebook in the `notebook-craft` format, numbered in order (`01_...ipynb`). Where this plan says `monte_carlo.py`, `run.py` and so on, read the matching notebook; command line flags such as `--ticker` become entries in the notebook's parameters cell.
+> 2. **Trial family in the engine.** Code that tests must import, such as `build_trials` from section 7.2, moves into `quantlab/` so notebooks stay free of local helper files.
+> 3. **Commits** follow the `git-commits` skill and every clear step is pushed (see `CLAUDE.md`).
+
 ---
 
 ## 1. Goal
