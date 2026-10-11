@@ -89,3 +89,7 @@ Slow, long/flat trend rules reliably beat the rest of the family (PBO 0.10) and 
 ## Contributing
 
 This is a personal research repo. Commits follow Conventional Commits.
+
+## License
+
+MIT © 2026 Franz Triebe. See [LICENSE](LICENSE). Market data is not included: it is downloaded from Yahoo Finance and the Ken French data library under their own terms.
