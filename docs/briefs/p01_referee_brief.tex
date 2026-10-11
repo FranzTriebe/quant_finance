@@ -1,0 +1,103 @@
+\documentclass[10pt,a4paper]{article}
+% Compatibility for LaTeX kernels before 2025-11 (TinyTeX 2025): tcolorbox 6.9 calls these
+% PDF tagging commands. They do nothing without tagging; delete once TeX Live is updated.
+\providecommand\NewStructureName[1]{}
+\providecommand\AssignStructureRole[2]{}
+\providecommand\UseStructureName[1]{}
+\usepackage{modeldoc}
+\shorttitle{Backtest referee}
+\doctype{Model brief}
+
+\begin{document}
+
+\mdtitle{Backtest referee}{How far to trust the best backtest out of many tries}
+\begin{mdmeta}
+Universe  & Strategy variants backtested on the same data; first used on 256 trend rules on SPY \\
+Output    & Verdict with deflated Sharpe ratio (DSR) and probability of backtest overfitting (PBO) \\
+Version   & 0.1, October 2026 \\
+Owner     & Franz Triebe \\
+Full spec & \code{PLAN.md} section 6.5 and \code{quantlab/validation.py}; no methodology document yet \\
+\end{mdmeta}
+
+\begin{keybox}[title=Decision question]
+Is the best backtest from a search over many variants good enough to act on, once the search itself is taken into account?
+The referee does \emph{not} forecast returns.
+It compares strategies with cash; the comparison with buy and hold is a separate step.
+\end{keybox}
+
+\section{Intuition}
+\textbf{The more variants someone tries, the better the best one looks by luck alone.}
+In simulations for this project, the best of seven strategies with no skill at all shows a Sharpe ratio of about 1 over two years.
+The referee estimates how good the best of the tried variants would look if none of them had any skill, and asks how likely the winner is to be truly above that luck hurdle.
+A second check cuts the history into halves in \num{12870} different ways and counts how often the winner of one half ends up in the bottom half of the other.
+Every variant ever run on the same data is counted in a permanent ledger, so repeated searches raise the hurdle.
+
+\begin{center}
+\begin{tikzpicture}[node distance=4mm and 7mm]
+  \node[box,text width=2.3cm] (v) {Variants\\[-1pt]\footnotesize N backtests, same dates};
+  \node[box,text width=2.3cm,right=of v] (p) {Pick the best\\[-1pt]\footnotesize highest Sharpe ratio};
+  \node[box,text width=2.3cm,anchor=west] (h) at ($(p.east)+(9mm,8mm)$) {Luck hurdle\\[-1pt]\footnotesize DSR};
+  \node[box,text width=2.3cm,anchor=west] (s) at ($(p.east)+(9mm,-8mm)$) {Split test\\[-1pt]\footnotesize PBO};
+  \node[box,text width=2.3cm,anchor=west] (d) at ($(h.east)!0.5!(s.east)+(9mm,0)$) {Verdict\\[-1pt]\footnotesize strong, weak or luck};
+  \node[box,text width=2.3cm,above=4mm of h] (l) {Trial ledger\\[-1pt]\footnotesize all runs on the data};
+  \draw[arr] (v) -- (p); \draw[arr] (p.east) -- (h.west); \draw[arr] (p.east) -- (s.west);
+  \draw[arr] (h.east) -- (d.west); \draw[arr] (s.east) -- (d.west); \draw[arr] (l) -- (h);
+\end{tikzpicture}
+\end{center}
+
+\section{Inputs}
+\begin{tabularx}{\linewidth}{@{}P{5.6cm}LP{2.9cm}@{}}
+\toprule
+Input & Identifier & Used for \\
+\midrule
+Daily excess returns of all variants & \code{backtest.run\_many} & hurdle, DSR, PBO \\
+The picked variant & highest full sample Sharpe ratio & DSR, holdout \\
+Variants ever tried on this data & \code{output/trial\_ledger.csv} & hurdle \\
+Prices and cash rate (example) & Yahoo \code{SPY}; Ken French T bill & the backtests \\
+\bottomrule
+\end{tabularx}
+
+\needspace{10\baselineskip}
+\section{How the score is built}
+\begin{equation*}
+\text{DSR}=\Phi\!\left(\frac{(\widehat{SR}-SR_0)\sqrt{T-1}}{\sqrt{1-\hat\gamma_3\,\widehat{SR}+\frac{\hat\gamma_4-1}{4}\,\widehat{SR}^{2}}}\right)
+\end{equation*}
+where $\widehat{SR}$ is the winner's daily Sharpe ratio over $T$ days, $SR_0$ the luck hurdle, $\hat\gamma_3$ and $\hat\gamma_4$ measure how lopsided and how fat tailed its daily returns are, and $\Phi$ turns the result into a probability.
+In words: the DSR is the probability that the winner's true Sharpe ratio lies above the hurdle.
+The hurdle grows with the number of variants tried and with how widely their results spread.
+Longer histories make the estimate more precise; large losses on single days make it less precise.
+PBO is the share of the \num{12870} history splits in which the first half's winner lands at or below the middle of the second half.
+The verdict combines both numbers with thresholds fixed before any result is seen; \emph{luck} below stands for \emph{not distinguishable from luck}.
+
+\section{How to read the output}
+\begin{tabularx}{\linewidth}{@{}P{2.4cm}P{3.6cm}L@{}}
+\toprule
+Verdict & Condition & Meaning \\
+\midrule
+Strong & DSR at least 0.95 and PBO at most 0.20 & The winner is very likely above the luck hurdle, and picking winners in this family works out of sample. \\
+Weak & DSR at least 0.80 and PBO at most 0.50 & Some evidence for the winner; treat its backtest Sharpe ratio as an upper bound. \\
+Luck & anything else & The backtest is about as good as the best useless variant would look. Do not act on the specific rule. \\
+\bottomrule
+\end{tabularx}
+
+\textbf{A low PBO is no evidence for the winner by itself.}
+PBO shows whether choosing within the family helps; DSR shows whether the chosen rule beats luck.
+In the first application PBO was 0.10 and DSR 0.58.
+
+\section{Worked example}
+256 trend timing rules on SPY, 11 April 1994 to 9 October 2026 (\num{8180} trading days), one day delay and 5\bp{} costs per trade.
+The best rule (50 day average above 250 day average, invested or in cash, scaled to 15\% volatility, weekly) has a Sharpe ratio of 0.68; buy and hold has 0.53.
+The luck hurdle for 256 variants is 0.65, so DSR is 0.58, below 0.80; PBO is 0.10; verdict: not distinguishable from luck.
+Picked on 1994 to 2015 only, the best rule earned a Sharpe ratio of 0.65 afterwards against 0.75 for buy and hold.
+In words: the best trend rule looks about as good as the best of 256 useless rules would, and it fell behind buy and hold after the selection period.
+
+\section{Limitations}
+\begin{itemize}
+  \item Similar variants count as fewer independent tries, and the right count is uncertain: in the example the verdict is strong if the 256 rules count as 2.5 independent tries and not distinguishable from luck at 105 or 256. The referee uses the raw count
+  \item The hurdle treats every difference between variants as luck, including real ones such as invested or in cash against long or short, which makes it strict
+  \item Strategies are measured against cash: a rule that holds shares most of the time clears a zero hurdle easily, so compare with buy and hold separately
+  \item A single PBO figure scatters widely: for pure noise it ranged from 0.16 to 0.84 across 20 simulated histories
+  \item Only variants recorded in the ledger count. Ideas tried outside this code on the same data are missing, so the hurdle is a lower bound
+\end{itemize}
+
+\end{document}
