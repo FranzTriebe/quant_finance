@@ -35,8 +35,9 @@ def reference_line(ax: Axes, value: float, label: str, axis: str = "x",
 
     ``axis="x"`` draws a vertical line at x = value, ``axis="y"`` a horizontal one. Use
     different ``linestyle`` values (``"--"``, ``":"``, ``"-."``) to tell several lines
-    apart. ``side="left"`` puts the label on the other side of a vertical line and
-    ``ypos`` (0 to 1, axes height) moves it down, so close lines stay readable.
+    apart. ``side="left"`` puts the label left of a vertical line, or at the left end of
+    a horizontal one, and ``ypos`` (0 to 1, axes height) moves the label of a vertical
+    line down, so close lines stay readable.
     """
     fs = mpl.rcParams["legend.fontsize"]
     if axis == "x":
@@ -47,8 +48,9 @@ def reference_line(ax: Axes, value: float, label: str, axis: str = "x",
                     ha="right" if left else "left", va="top", fontsize=fs)
     elif axis == "y":
         ax.axhline(value, color=acad.INK, linestyle=linestyle, linewidth=0.9)
-        ax.annotate(label, xy=(1.0, value), xycoords=("axes fraction", "data"),
-                    xytext=(-3, 3), textcoords="offset points", ha="right", va="bottom",
-                    fontsize=fs)
+        left = side == "left"
+        ax.annotate(label, xy=(0.0 if left else 1.0, value), xycoords=("axes fraction", "data"),
+                    xytext=(3 if left else -3, 3), textcoords="offset points",
+                    ha="left" if left else "right", va="bottom", fontsize=fs)
     else:
         raise ValueError("axis must be 'x' or 'y'")

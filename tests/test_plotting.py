@@ -45,3 +45,10 @@ def test_wealth_drawdown_figure_saves_pdf_and_png(tmp_path):
     paths = acad.save(fig, "test_fig", outdir=str(tmp_path))
     plt.close(fig)
     assert [p.suffix for p in paths] == [".pdf", ".png"] and all(p.exists() for p in paths)
+
+
+def test_horizontal_reference_label_can_sit_left():
+    fig, ax = plt.subplots()
+    plotting.reference_line(ax, 0.2, "average", axis="y", side="left")
+    assert ax.texts[0].get_ha() == "left" and ax.texts[0].xy[0] == 0.0
+    plt.close(fig)
