@@ -26,8 +26,10 @@ Franz's house rules live in `.claude/skills/` and apply to this whole repo:
 * `notebook-craft`: every Jupyter notebook. A notebook must run without other local files; installed packages, including `quantlab`, are fine.
 * `readme-craft`: every README.
 * `model-docs`: every report or model write-up, in LaTeX with the shared `modeldoc.sty` (full methodology or 1 to 2 page model brief).
+* `academic-graphs`: every figure, in the boxed black and white academic style. The helper lives in the engine as `quantlab.acad`, so notebooks import it like any library.
+* `natural-writing`: a final prose pass on every text meant for a reader (reports, READMEs, notebook markdown, commit messages).
 
-Where a skill and this file disagree, the hard rules below and `PLAN.md` win. In particular: lags happen only in `backtest.run`, and figures use `quantlab.plotting`.
+Where a skill and this file disagree, the hard rules below and `PLAN.md` win. In particular: lags happen only in `backtest.run`.
 
 ## Hard rules (research integrity)
 
@@ -48,11 +50,11 @@ Where a skill and this file disagree, the hard rules below and `PLAN.md` win. In
 * Short numpy style docstrings that explain the finance, not only the code.
 * `quantlab/` holds pure functions. File I/O happens only in `data.py` and in the project notebooks.
 * Project work lives in Jupyter notebooks that follow the `notebook-craft` skill. They import `quantlab` like any installed library and need no other local files. Code that tests must import belongs in `quantlab/`.
-* Figures:
-  * matplotlib, one y axis per chart, 2px lines, light solid grid
-  * colors from `quantlab.plotting.PALETTE`
-  * the takeaway as the title
-  * saved to `output/<project>/` at 150 dpi
+* Figures follow the `academic-graphs` skill through `quantlab.acad`:
+  * black, grey and line styles only, boxed axes, one y axis per panel
+  * descriptive panel titles such as `(a) Growth of $1, log scale`; the takeaway goes in the caption (the markdown cell below the figure), not in the figure
+  * a note under the figure naming data, sample and definitions
+  * saved to `output/<project>/` as vector PDF and 300 dpi PNG
 
 ## Writing for Franz (reports, README, comments, chat)
 
