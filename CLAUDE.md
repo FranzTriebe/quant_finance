@@ -25,6 +25,7 @@ Franz's house rules live in `.claude/skills/` and apply to this whole repo:
 * `git-commits`: every commit and PR title.
 * `notebook-craft`: every Jupyter notebook. A notebook must run without other local files; installed packages, including `quantlab`, are fine.
 * `readme-craft`: every README.
+* `model-docs`: every report or model write-up, in LaTeX with the shared `modeldoc.sty` (full methodology or 1 to 2 page model brief).
 
 Where a skill and this file disagree, the hard rules below and `PLAN.md` win. In particular: lags happen only in `backtest.run`, and figures use `quantlab.plotting`.
 
