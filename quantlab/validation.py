@@ -302,6 +302,32 @@ def ledger_count(project: str, data_id: str, path: str = "output/trial_ledger.cs
     return int(ledger.loc[mask, "trial_id"].nunique())
 
 
+# Holdout check -------------------------------------------------------------------------
+
+def holdout(trials: pd.DataFrame, benchmark: pd.Series, split: float = 2 / 3) -> dict:
+    """Select the best trial on the first part of the sample and test it on the rest.
+
+    This is what a researcher should have done before looking at the whole sample: the
+    last ``1 - split`` of the dates are never used for selection. Sharpe ratios are
+    annualized; rank 1 is the best trial in the holdout.
+    """
+    cut = int(len(trials) * split)
+    train, test = trials.iloc[:cut], trials.iloc[cut:]
+    sr_train = train.mean() / train.std(ddof=1) * np.sqrt(PERIODS)
+    sr_test = test.mean() / test.std(ddof=1) * np.sqrt(PERIODS)
+    selected = sr_train.idxmax()
+    bench_test = benchmark.loc[test.index]
+    return {
+        "selected": selected, "split_date": test.index[0],
+        "train_sr": float(sr_train[selected]),
+        "test_sr": float(sr_test[selected]),
+        "test_sr_benchmark": float(bench_test.mean() / bench_test.std(ddof=1) * np.sqrt(PERIODS)),
+        "test_sr_median_trial": float(sr_test.median()),
+        "test_rank": int(sr_test.rank(ascending=False)[selected]),
+        "n_trials": trials.shape[1], "test_sharpes": sr_test,
+    }
+
+
 # (j): the report -----------------------------------------------------------------------
 
 def referee_report(trials: pd.DataFrame, selected: str, n_blocks: int = 16,
