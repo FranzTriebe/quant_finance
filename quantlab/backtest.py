@@ -80,8 +80,8 @@ def _align_rf(rf: pd.Series | None, index: pd.DatetimeIndex) -> pd.Series:
     return aligned
 
 
-def run_many(weights: dict[str, pd.Series], returns: pd.Series, **kw) -> pd.DataFrame:
-    """Backtest many trials on one asset and return a T x N matrix of daily excess returns.
+def run_all(weights: dict[str, pd.Series], returns: pd.Series, **kw) -> dict[str, pd.DataFrame]:
+    """Backtest many trials on one asset over a common sample; full ``run`` output each.
 
     All trials share exactly the same dates: before backtesting, every trial's weights
     are blanked until the date when the slowest trial (longest warmup) has its first
@@ -95,6 +95,14 @@ def run_many(weights: dict[str, pd.Series], returns: pd.Series, **kw) -> pd.Data
     if empty:
         raise ValueError(f"trials without any weight: {empty[:5]}")
     common_start = max(firsts.values())
-    columns = {k: run(w.where(w.index >= common_start), returns, **kw)["excess"]
-               for k, w in weights.items()}
-    return pd.DataFrame(columns).dropna()
+    results = {k: run(w.where(w.index >= common_start), returns, **kw) for k, w in weights.items()}
+    common = pd.DataFrame({k: r["excess"] for k, r in results.items()}).dropna().index
+    return {k: r.loc[common] for k, r in results.items()}
+
+
+def run_many(weights: dict[str, pd.Series], returns: pd.Series, **kw) -> pd.DataFrame:
+    """Backtest many trials on one asset and return a T x N matrix of daily excess returns.
+
+    Same common sample rules as ``run_all``; this is the input the referee expects.
+    """
+    return pd.DataFrame({k: r["excess"] for k, r in run_all(weights, returns, **kw).items()})

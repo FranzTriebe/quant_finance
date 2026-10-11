@@ -81,3 +81,7 @@ def test_run_many_returns_common_sample_without_nan(returns):
     assert not out.isna().any().any()
     slowest_first_weight = trials["sma50"].first_valid_index()
     assert out.index[0] == returns.index[returns.index.get_loc(slowest_first_weight) + 1]
+
+    full = backtest.run_all(trials, returns)
+    assert all(r.index.equals(out.index) for r in full.values())
+    pd.testing.assert_series_equal(full["sma20"]["excess"], out["sma20"], check_names=False)
