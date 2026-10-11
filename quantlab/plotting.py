@@ -58,13 +58,15 @@ def apply_style() -> None:
 
 
 def reference_line(ax: Axes, value: float, label: str, axis: str = "x",
-                   color: str | None = None, side: str = "right") -> None:
+                   color: str | None = None, side: str = "right",
+                   ypos: float = 1.0) -> None:
     """Draw a dashed reference line (a benchmark, a hurdle) and label it on the line.
 
     ``axis="x"`` draws a vertical line at x = value, ``axis="y"`` a horizontal one.
     The label sits next to the line in the secondary text colour, so no legend entry
     is needed. ``side="left"`` puts it on the other side of a vertical line, so two
-    nearby lines can both be labelled.
+    nearby lines can both be labelled, and ``ypos`` (0 to 1, axes height) moves the label
+    of a vertical line down so that three close lines stay readable.
     """
     color = color or PALETTE["text_secondary"]
     style = {"color": color, "linestyle": "--", "linewidth": 1.2}
@@ -72,7 +74,7 @@ def reference_line(ax: Axes, value: float, label: str, axis: str = "x",
     if axis == "x":
         ax.axvline(value, **style)
         left = side == "left"
-        ax.annotate(label, (value, 1), xycoords=("data", "axes fraction"),
+        ax.annotate(label, (value, ypos), xycoords=("data", "axes fraction"),
                     xytext=(-4 if left else 4, -4), textcoords="offset points", va="top",
                     ha="right" if left else "left", **text)
     elif axis == "y":

@@ -33,3 +33,10 @@ def test_reference_line_label_can_sit_left_of_the_line():
     plotting.reference_line(ax, 0.5, "left label", side="left")
     assert ax.texts[0].get_ha() == "right"
     plt.close(fig)
+
+
+def test_reference_line_label_height_can_be_lowered():
+    fig, ax = plt.subplots()
+    plotting.reference_line(ax, 0.5, "low label", ypos=0.6)
+    assert ax.texts[0].xy[1] == 0.6
+    plt.close(fig)
