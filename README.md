@@ -1,4 +1,4 @@
-# quant_finance
+# quantitative_strategies
 
 Quant research projects based on academic papers, built on a tested backtesting and validation engine.
 
